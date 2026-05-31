@@ -2,7 +2,7 @@ name: Enhancement Request
 
 description: Suggest improvement
 
-title: "[ENHANCEMENT]: "
+title: "[ENHANCEMENT]:"
 
 labels:
   - enhancement
@@ -12,7 +12,7 @@ body:
   - type: textarea
     id: current_problem
     attributes:
-      label: Current Problem
+      label: Problem statement
 
   - type: textarea
     id: proposed_solution
