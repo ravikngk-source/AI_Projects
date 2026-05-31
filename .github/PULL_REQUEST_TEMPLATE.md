@@ -1,13 +1,66 @@
-## Changes
+## \# Pull Request Checklist
 
-- Added Login Automation
-- Added POM
+## 
 
-## Testing
+## \## JIRA Reference
 
-- Smoke Passed
-- Regression Passed
+## 
 
-## JIRA
+## JIRA ID:
 
-PAY-1234
+## 
+
+## \---
+
+## 
+
+## \## Change Summary
+
+## 
+
+## Describe the changes made.
+
+## 
+
+## \---
+
+## 
+
+## \## Code Quality
+
+## 
+
+## \* \[ ] Copilot Review Completed
+
+## \* \[ ] Code Owner Review Required
+
+## 
+
+## \---
+
+## 
+
+## \## Branch Validation
+
+## 
+
+## Branch must follow:
+
+## 
+
+## feature/<branch\_name>
+
+## 
+
+## Example:
+
+## 
+
+## feature/login
+
+## feature/payment
+
+## feature/api\_automation
+
+## 
+
