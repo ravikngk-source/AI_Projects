@@ -1,0 +1,20 @@
+name: Enhancement Request
+
+description: Suggest improvement
+
+title: "[ENHANCEMENT]: "
+
+labels:
+  - enhancement
+
+body:
+
+  - type: textarea
+    id: current_problem
+    attributes:
+      label: Current Problem
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
