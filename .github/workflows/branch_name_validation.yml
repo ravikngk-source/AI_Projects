@@ -1,0 +1,23 @@
+name: Branch Naming Validation
+
+on:
+pull_request:
+types:
+- opened
+- synchronize
+- reopened
+
+jobs:
+validate-branch:
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Validate branch name
+    run: |
+      BRANCH_NAME="${{ github.head_ref }}"
+
+      if [[ ! "$BRANCH_NAME" =~ ^feature\/.+$ ]]; then
+        echo "ERROR: Branch name must follow feature/<branch_name>"
+        exit 1
+      fi
