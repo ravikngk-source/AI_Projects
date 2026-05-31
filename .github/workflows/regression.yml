@@ -1,0 +1,11 @@
+name: Regression Workflow
+
+on:
+  pull_request: 
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Say Hello to Regression
