@@ -1,6 +1,36 @@
-Title:
-Environment:
-Steps:
-Expected:
-Actual:
-Screenshot:
+name: Bug Report
+
+description: Report a defect
+
+title: "[BUG]: "
+
+labels:
+  - bug
+
+body:
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: SIT/UAT/PROD
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Result
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Result
