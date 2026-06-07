@@ -1,11 +1,12 @@
 name: Regression Workflow
 
 on:
-  pull_request: 
+  push:
 
 jobs:
   hello:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Say Hello to Regression
+      - name: Say Hello
+        run: echo "Hello Regression"
