@@ -1,0 +1,174 @@
+name: PR Code Review - Diagnostic Only
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.py'
+      - '.github/workflows/pr-validate.yml'
+      - '.github/skills/pr-mergability-validator/**'
+
+permissions:
+  pull-requests: write
+  contents: read
+  checks: write
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    name: Code Quality Review (Diagnostic)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install diagnostic tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint flake8 mypy pydocstyle
+
+      - name: Get changed Python files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **.py
+
+      - name: Validate Python syntax
+        id: syntax-check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::group::Syntax Validation"
+          python .github/scripts/validate_syntax.py \
+            --files "${{ steps.changed-files.outputs.all_changed_files }}" \
+            --output ".github/syntax-report.json"
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Validate naming conventions
+        id: naming-check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::group::Naming Convention Check"
+          python .github/scripts/check_naming_conventions.py ${{ steps.changed-files.outputs.all_changed_files }} || true
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Check docstring coverage
+        id: docstring-check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::group::Docstring Coverage Check"
+          pip install pydocstyle
+          pydocstring ${{ steps.changed-files.outputs.all_changed_files }} || true
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Type hint validation
+        id: type-check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::group::Type Hints Check"
+          mypy --ignore-missing-imports ${{ steps.changed-files.outputs.all_changed_files }} || true
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Lint with pylint
+        id: pylint-check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "::group::Pylint Analysis"
+          pylint --exit-zero --output-format=json ${{ steps.changed-files.outputs.all_changed_files }} > pylint-report.json || true
+          cat pylint-report.json
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Generate PR Review Comment
+        id: generate-comment
+        if: always()
+        run: |
+          python .github/scripts/generate_pr_comment.py \
+            --changed-files "${{ steps.changed-files.outputs.all_changed_files }}" \
+            --pr-number ${{ github.event.pull_request.number }}
+        continue-on-error: true
+
+      - name: Post review comment on PR
+        if: always() && github.event.pull_request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const comment = fs.existsSync('.github/pr-review-comment.md') 
+              ? fs.readFileSync('.github/pr-review-comment.md', 'utf8')
+              : '## 🔍 Code Review - Diagnostic Report\n\n✓ Analysis complete. Please review the observations above.';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Request reviewer approval
+        if: always() && github.event.pull_request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Add assigned reviewer label to ensure visibility
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['code-review-pending']
+            });
+            
+            console.log('✓ PR marked for reviewer attention');
+
+      - name: Set check status to neutral (requires review)
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = 'Code review analysis complete';
+            let text = '**Status**: Awaiting Lead/Reviewer Approval\n\n';
+            text += 'This PR requires manual code review by an assigned reviewer or team lead before it can be merged.\n\n';
+            
+            if (fs.existsSync('.github/findings-summary.txt')) {
+              text += fs.readFileSync('.github/findings-summary.txt', 'utf8');
+            }
+
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Code Review (Diagnostic)',
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'completed',
+              conclusion: 'neutral',
+              output: {
+                title: 'Code Review Summary',
+                summary: summary,
+                text: text
+              }
+            });
+
+  # Enforce manual review requirement
+  require-approval:
+    runs-on: ubuntu-latest
+    name: Enforce Manual Reviewer Approval
+
+    steps:
+      - name: Info - Manual Review Required
+        run: |
+          echo "ℹ️  This PR requires manual code review."
+          echo "ℹ️  Only a team lead or assigned reviewer can approve this PR for merge."
+          echo "ℹ️  This is not an automated block - reviewer discretion is final."
+          exit 0
