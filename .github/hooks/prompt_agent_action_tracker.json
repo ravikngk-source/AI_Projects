@@ -1,0 +1,32 @@
+{
+  "name": "prompt_agent_action_tracker",
+  "description": "Track each prompt, agent, and tool action during the session for auditing and transparency.",
+  "events": [
+    "SessionStart",
+    "PreToolUse",
+    "PostToolUse",
+    "AgentAction",
+    "SessionEnd"
+  ],
+  "action": {
+    "type": "log",
+    "destination": ".github/hooks/prompt_agent_actions.log",
+    "format": "json",
+    "include": [
+      "timestamp",
+      "event",
+      "agent",
+      "tool",
+      "prompt",
+      "action",
+      "metadata"
+    ]
+  },
+  "enabled": true,
+  "runner": "python .github/hooks/hook_dispatcher.py",
+  "behavior": {
+    "block": false,
+    "warn": false,
+    "injectContext": "Track and record every agent and tool action for prompt/agent auditing."
+  }
+}

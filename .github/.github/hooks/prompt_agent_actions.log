@@ -1,0 +1,3 @@
+{"timestamp": "2026-08-12T07:41:48.563294Z", "event": "SessionStart", "agent": "test", "tool": null, "prompt": null, "action": "manual_test", "metadata": {}}
+{"timestamp": "2026-08-12T07:42:18.574259Z", "event": "SessionStart", "agent": "test", "tool": null, "prompt": null, "action": "manual_test", "metadata": {}}
+{"timestamp": "2026-08-12T17:06:58.365495Z", "event": "SessionStart", "agent": "test", "tool": null, "prompt": null, "action": "manual_test", "metadata": {}}
